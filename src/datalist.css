@@ -1,0 +1,28 @@
+/* src/DataList.css */
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  th {
+    color: black;
+    width:100rem;
+    background-color: #f4f4f4;
+  }
+  
+  .empty {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .filled {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
