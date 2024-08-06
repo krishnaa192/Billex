@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import './datalist.css'; // Import a CSS file for styling
 
 const DataList = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({});
   const [serviceIds, setServiceIds] = useState([]);
   const [hours, setHours] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,21 +27,29 @@ const DataList = () => {
 
         // Process and structure the data
         const processedData = result.reduce((acc, item) => {
-          const { app_serviceid, time, pingenCount, pingenCountSuccess, pinverCount, pinverCountSuccess } = item;
+          const { app_serviceid, territory, servicename, operator, partner, time, pingenCount, pingenCountSuccess, pinverCount, pinverCountSuccess } = item;
+
+          // Initialize service ID entry if not present
           if (!acc[app_serviceid]) {
-            acc[app_serviceid] = Array.from({ length: 24 }, () => ({
-              pingenCount: 0,
-              pingenCountSuccess: 0,
-              pinverCount: 0,
-              pinverCountSuccess: 0,
-            }));
+            acc[app_serviceid] = {
+              info: { territory, servicename, operator, partner },
+              hours: Array.from({ length: 24 }, () => ({
+                pingenCount: 0,
+                pingenCountSuccess: 0,
+                pinverCount: 0,
+                pinverCountSuccess: 0,
+              })),
+            };
           }
-          acc[app_serviceid][parseInt(time, 10)] = {
+
+          // Update hourly data
+          acc[app_serviceid].hours[parseInt(time, 10)] = {
             pingenCount: pingenCount || 0,
             pingenCountSuccess: pingenCountSuccess || 0,
             pinverCount: pinverCount || 0,
             pinverCountSuccess: pinverCountSuccess || 0,
           };
+
           return acc;
         }, {});
 
@@ -72,11 +80,15 @@ const DataList = () => {
 
   return (
     <div>
-      <h1>Data List</h1>
+    
       <table>
         <thead>
           <tr>
             <th>Service ID</th>
+            <th>Territory</th>
+            <th>Service Name</th>
+            <th>Operator</th>
+            <th>Partner</th>
             {hours.map(hour => (
               <th key={hour}>{`${hour}:00-${hour + 1}:00`}</th>
             ))}
@@ -84,12 +96,16 @@ const DataList = () => {
         </thead>
         <tbody>
           {serviceIds.map(serviceId => {
-            const dataForService = data[serviceId] || [];
+            const { info, hours: hoursData } = data[serviceId];
             return (
               <tr key={serviceId}>
-                <td>{`Service ID: ${serviceId}`}</td>
+                <td>{` ${serviceId}`}</td>
+                <td>{info.territory}</td>
+                <td>{info.servicename}</td>
+                <td>{info.operator}</td>
+                <td>{info.partner}</td>
                 {hours.map(hour => {
-                  const dataForHour = dataForService[hour] || {
+                  const dataForHour = hoursData[hour] || {
                     pingenCount: 0,
                     pingenCountSuccess: 0,
                     pinverCount: 0,
@@ -97,7 +113,7 @@ const DataList = () => {
                   };
                   return (
                     <td key={hour}>
-                      {`${dataForHour.pingenCount || ''} pg ${dataForHour.pingenCountSuccess || ''} pgs ${dataForHour.pinverCount || ''} pv ${dataForHour.pinverCountSuccess || ''} pvs`}
+                      {`${dataForHour.pingenCount || 0}  ${dataForHour.pingenCountSuccess || 0}  ${dataForHour.pinverCount || 0}  ${dataForHour.pinverCountSuccess || 0} `}
                     </td>
                   );
                 })}
