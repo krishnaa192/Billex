@@ -23,9 +23,8 @@ const DataList = () => {
         }
 
         const result = await response.json();
-        console.log('API Result:', result); // Log the result to check its structure
+        console.log('API Result:', result);
 
-        // Process and structure the data
         const processedData = result.reduce((acc, item) => {
           const { app_serviceid, territory, servicename, operator, partner, time, pingenCount, pingenCountSuccess, pinverCount, pinverCountSuccess } = item;
 
@@ -78,9 +77,11 @@ const DataList = () => {
     return <div>Error: {error}</div>;
   }
 
+  // Get the current hour
+  const currentHour = new Date().getHours();
+
   return (
     <div>
-    
       <table>
         <thead>
           <tr>
@@ -89,9 +90,11 @@ const DataList = () => {
             <th>Service Name</th>
             <th>Operator</th>
             <th>Partner</th>
-            {hours.map(hour => (
-              <th key={hour}>{`${hour}:00-${hour + 1}:00`}</th>
-            ))}
+            {hours
+              .filter(hour => hour < currentHour) // Filter hours less than current hour
+              .map(hour => (
+                <th key={hour}>{`${hour}:00-${hour + 1}:00`}</th>
+              ))}
           </tr>
         </thead>
         <tbody>
@@ -99,24 +102,35 @@ const DataList = () => {
             const { info, hours: hoursData } = data[serviceId];
             return (
               <tr key={serviceId}>
-                <td>{` ${serviceId}`}</td>
+                <td>{serviceId}</td>
                 <td>{info.territory}</td>
                 <td>{info.servicename}</td>
                 <td>{info.operator}</td>
                 <td>{info.partner}</td>
-                {hours.map(hour => {
-                  const dataForHour = hoursData[hour] || {
-                    pingenCount: 0,
-                    pingenCountSuccess: 0,
-                    pinverCount: 0,
-                    pinverCountSuccess: 0,
-                  };
-                  return (
-                    <td key={hour}>
-                      {`${dataForHour.pingenCount || 0}  ${dataForHour.pingenCountSuccess || 0}  ${dataForHour.pinverCount || 0}  ${dataForHour.pinverCountSuccess || 0} `}
-                    </td>
-                  );
-                })}
+                {hours
+                  .filter(hour => hour < currentHour) // Filter hours less than current hour
+                  .map(hour => {
+                    const dataForHour = hoursData[hour] || {
+                      pingenCount: 0,
+                      pingenCountSuccess: 0,
+                      pinverCount: 0,
+                      pinverCountSuccess: 0,
+                    };
+                    
+                    // Check if all counts are zero
+                    const allCountsZero = 
+                      dataForHour.pingenCount === 0 &&
+                      dataForHour.pingenCountSuccess === 0 &&
+                      dataForHour.pinverCount === 0 &&
+                      dataForHour.pinverCountSuccess === 0;
+
+                    return (
+                      <td key={hour}>
+                        {allCountsZero ? '- - - -' : 
+                          `${dataForHour.pingenCount || 0} ${dataForHour.pingenCountSuccess || 0} ${dataForHour.pinverCount || 0} ${dataForHour.pinverCountSuccess || 0}`}
+                      </td>
+                    );
+                  })}
               </tr>
             );
           })}
