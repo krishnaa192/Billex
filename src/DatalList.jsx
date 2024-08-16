@@ -17,7 +17,6 @@ const DataList = () => {
             'Content-Type': 'application/json',
           },
         });
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -28,7 +27,7 @@ const DataList = () => {
         const processedData = result.reduce((acc, item) => {
           const { app_serviceid, territory, servicename, operator, partner, time, pingenCount, pingenCountSuccess, pinverCount, pinverCountSuccess } = item;
 
-          // Initialize service ID entry if not present
+          // Initialize service ID entry if not presen
           if (!acc[app_serviceid]) {
             acc[app_serviceid] = {
               info: { territory, servicename, operator, partner },
@@ -48,7 +47,6 @@ const DataList = () => {
             pinverCount: pinverCount || 0,
             pinverCountSuccess: pinverCountSuccess || 0,
           };
-
           return acc;
         }, {});
 
@@ -90,11 +88,23 @@ const DataList = () => {
             <th>Service Name</th>
             <th>Operator</th>
             <th>Partner</th>
-            {hours
-              .filter(hour => hour < currentHour) // Filter hours less than current hour
-              .map(hour => (
-                <th key={hour}>{`${hour}:00-${hour + 1}:00`}</th>
-              ))}
+
+            {
+  hours
+    .filter(hour => hour < currentHour) // Filter hours less than current hour
+    .map(hour => {
+      const startHour = hour % 12 === 0 ? 12 : hour % 12;
+      const endHour = (hour + 1) % 12 === 0 ? 12 : (hour + 1) % 12;
+      const periodStart = hour < 12 ? 'am' : 'pm';
+      const periodEnd = (hour + 1) < 12 || (hour + 1) === 24 ? 'am' : 'pm';
+
+      return (
+        <th key={hour}>
+          {`${startHour}:00 ${periodStart}-${endHour}:00 ${periodEnd}`}
+        </th>
+      );
+    })
+}
           </tr>
         </thead>
         <tbody>
@@ -102,6 +112,7 @@ const DataList = () => {
             const { info, hours: hoursData } = data[serviceId];
             return (
               <tr key={serviceId}>
+
                 <td>{serviceId}</td>
                 <td>{info.territory}</td>
                 <td>{info.servicename}</td>
@@ -116,9 +127,9 @@ const DataList = () => {
                       pinverCount: 0,
                       pinverCountSuccess: 0,
                     };
-                    
+
                     // Check if all counts are zero
-                    const allCountsZero = 
+                    const allCountsZero =
                       dataForHour.pingenCount === 0 &&
                       dataForHour.pingenCountSuccess === 0 &&
                       dataForHour.pinverCount === 0 &&
@@ -126,7 +137,7 @@ const DataList = () => {
 
                     return (
                       <td key={hour}>
-                        {allCountsZero ? '- - - -' : 
+                        {allCountsZero ? '- - - -' :
                           `${dataForHour.pingenCount || 0} ${dataForHour.pingenCountSuccess || 0} ${dataForHour.pinverCount || 0} ${dataForHour.pinverCountSuccess || 0}`}
                       </td>
                     );
