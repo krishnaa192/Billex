@@ -11,7 +11,7 @@ const DataList = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://wap.matrixads.in/mglobopay/getSupportMonitorData', {
+        const response = await fetch('', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
